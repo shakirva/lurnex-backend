@@ -24,8 +24,12 @@ export class JobController {
         expires_at: req.body.expires_at || null
       };
       
-      // Use default admin user ID if not authenticated (for testing)
-      const userId = req.user?.userId || 1;
+      // Get user ID from authenticated token
+      if (!req.user) {
+        res.status(401).json({ success: false, message: 'Authentication required' });
+        return;
+      }
+      const userId = req.user.userId;
       
       const newJob = await JobModel.create(jobData, userId);
 
@@ -43,14 +47,24 @@ export class JobController {
 
   static async getAllJobs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log('📋 Getting all jobs...');
+      console.log('📋 Getting jobs for user:', req.user?.username || 'Guest');
       
       const jobs = await JobModel.findAll();
+      
+      // Check for active subscription
+      const hasSubscription = await JobController.checkUserSubscription(req.user?.userId);
+      
+      // If no subscription and not an admin/employer who posted it, mask sensitive data
+      const processedJobs = jobs.map(job => 
+        hasSubscription || req.user?.role === 'admin' 
+          ? job 
+          : JobController.maskJob(job)
+      );
 
       res.json({
         success: true,
         message: 'Jobs retrieved successfully',
-        data: jobs
+        data: processedJobs
       } as ApiResponse);
 
     } catch (error) {
@@ -75,15 +89,44 @@ export class JobController {
         return;
       }
 
+      // Check for active subscription
+      const hasSubscription = await JobController.checkUserSubscription(req.user?.userId);
+      
+      const processedJob = hasSubscription || req.user?.role === 'admin' || req.user?.userId === job.posted_by
+        ? job 
+        : JobController.maskJob(job);
+
       res.json({
         success: true,
         message: 'Job retrieved successfully',
-        data: job
+        data: processedJob
       } as ApiResponse);
 
     } catch (error) {
       next(error);
     }
+  }
+
+  // Helper to check if user has any active plan
+  private static async checkUserSubscription(userId?: number): Promise<boolean> {
+    if (!userId) return false;
+    
+    const { SubscriptionModel } = require('../models/Subscription');
+    const subscription = await SubscriptionModel.getUserSubscription(userId);
+    return !!subscription;
+  }
+
+  // Helper to mask sensitive job details for free users
+  private static maskJob(job: any): any {
+    return {
+      ...job,
+      company: 'Upgrade to see company',
+      salary: '🔒 Hidden',
+      description: job.description ? job.description.substring(0, 150) + '... (Upgrade to read full description)' : '',
+      logo: null, // Don't show company logo
+      requirements: ['Upgrade plan to see requirements'],
+      is_masked: true // Flag for frontend to show "Upgrade" UI
+    };
   }
 
   static async updateJob(req: Request, res: Response, next: NextFunction): Promise<void> {

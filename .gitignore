@@ -47,3 +47,8 @@ uploads/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Development Tools (Only used locally)
+Dockerfile
+docker-compose.yml
+.dockerignore

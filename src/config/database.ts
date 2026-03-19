@@ -40,7 +40,7 @@ class Database {
   async query(sql: string, params?: any[]): Promise<any> {
     const connection = await this.connect();
     try {
-      const [results] = await connection.execute(sql, params);
+      const [results] = await (params ? connection.query(sql, params) : connection.query(sql));
       return results;
     } catch (error) {
       console.error('Query Error:', error);

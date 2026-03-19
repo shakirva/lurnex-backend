@@ -14,7 +14,9 @@ export const createTables = async (): Promise<void> => {
         password VARCHAR(255) NOT NULL,
         first_name VARCHAR(50) NOT NULL,
         last_name VARCHAR(50) NOT NULL,
-        role ENUM('admin', 'user') DEFAULT 'user',
+        role ENUM('admin', 'user', 'employer') DEFAULT 'user',
+        phone VARCHAR(20),
+        company_name VARCHAR(100),
         is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -109,6 +111,37 @@ export const createTables = async (): Promise<void> => {
       );
     `;
 
+    // Create subscription plans table
+    const createPlansTable = `
+      CREATE TABLE IF NOT EXISTS subscription_plans (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        slug VARCHAR(50) UNIQUE NOT NULL,
+        duration_months INT NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    // Create user subscriptions table
+    const createSubscriptionsTable = `
+      CREATE TABLE IF NOT EXISTS user_subscriptions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        plan_id INT NOT NULL,
+        payment_reference VARCHAR(255),
+        is_active BOOLEAN DEFAULT TRUE,
+        expires_at TIMESTAMP NOT NULL,
+        started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (plan_id) REFERENCES subscription_plans(id) ON DELETE CASCADE,
+        INDEX idx_sub_user (user_id),
+        INDEX idx_sub_active (is_active),
+        INDEX idx_sub_expires (expires_at)
+      );
+    `;
+
     // Execute all table creation queries
     await database.query(createUsersTable);
     await database.query(createCategoriesTable);
@@ -116,8 +149,26 @@ export const createTables = async (): Promise<void> => {
     await database.query(createApplicationsTable);
     await database.query(createContactTable);
     await database.query(createSessionsTable);
+    await database.query(createPlansTable);
+    await database.query(createSubscriptionsTable);
 
-    console.log('✅ All database tables created successfully');
+    // Patch existing users table: add missing columns if they don't exist
+    const columns: any[] = await database.query(`DESCRIBE users`);
+    const columnNames = columns.map(c => c.Field);
+
+    if (!columnNames.includes('phone')) {
+      await database.query(`ALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER last_name`);
+      console.log('✅ Added phone column to users table');
+    }
+    if (!columnNames.includes('company_name')) {
+      await database.query(`ALTER TABLE users ADD COLUMN company_name VARCHAR(100) AFTER phone`);
+      console.log('✅ Added company_name column to users table');
+    }
+    
+    // Always update enum in case it needs it
+    await database.query(`ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user', 'employer') DEFAULT 'user'`);
+
+    console.log('✅ All database tables created/updated successfully');
   } catch (error) {
     console.error('❌ Failed to create tables:', error);
     throw error;
@@ -129,6 +180,8 @@ export const dropTables = async (): Promise<void> => {
     await database.connect();
     
     const tables = [
+      'user_subscriptions',
+      'subscription_plans',
       'admin_sessions',
       'job_applications', 
       'contact_messages',

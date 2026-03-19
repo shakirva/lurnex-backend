@@ -8,6 +8,8 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(error => error.msg).join(', ');
     
+    console.log('❌ Validation failed:', errorMessages);
+    
     const response: ApiResponse = {
       success: false,
       message: 'Validation failed',

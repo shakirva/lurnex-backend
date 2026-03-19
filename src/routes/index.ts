@@ -3,6 +3,7 @@ import authRoutes from './auth';
 import jobRoutes from './jobs';
 import applicationRoutes from './applications';
 import contactRoutes from './contact';
+import employerRoutes from './employers';
 import debugRoutes from './debug';
 
 const router = Router();
@@ -12,6 +13,7 @@ router.use('/auth', authRoutes);
 router.use('/jobs', jobRoutes);
 router.use('/applications', applicationRoutes);
 router.use('/contact', contactRoutes);
+router.use('/employers', employerRoutes);
 
 // Debug routes (only in development)
 if (process.env.NODE_ENV === 'development') {

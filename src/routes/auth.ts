@@ -7,8 +7,9 @@ import { loginValidation, registerValidation, changePasswordValidation } from '.
 const router = Router();
 
 // Public routes
-router.post('/login', AuthController.login); // Removed validation for simplicity
+router.post('/login', AuthController.login);
 router.post('/register', registerValidation, handleValidationErrors, AuthController.register);
+router.post('/forgot-password', AuthController.forgotPassword);
 
 // Protected routes
 router.get('/profile', authenticateToken, AuthController.getProfile);

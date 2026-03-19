@@ -7,8 +7,8 @@ export class UserModel {
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     
     const query = `
-      INSERT INTO users (username, email, password, first_name, last_name, role)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO users (username, email, password, first_name, last_name, role, phone, company_name)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const result = await database.query(query, [
@@ -17,7 +17,9 @@ export class UserModel {
       hashedPassword,
       userData.first_name,
       userData.last_name,
-      userData.role || 'user'
+      userData.role || 'user',
+      (userData as any).phone || null,
+      (userData as any).company_name || null,
     ]);
 
     const createdUser = await this.findById(result.insertId);
@@ -28,8 +30,8 @@ export class UserModel {
   }
 
   static async findById(id: number): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, role, is_active, created_at, updated_at FROM users WHERE id = ?';
-    const [rows] = await database.query(query, [id]);
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE id = ?';
+    const rows = await database.query(query, [id]);
     
     if (!rows || rows.length === 0) {
       return null;
@@ -39,8 +41,8 @@ export class UserModel {
   }
 
   static async findByUsername(username: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, role, is_active, created_at, updated_at FROM users WHERE username = ?';
-    const [rows] = await database.query(query, [username]);
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE username = ?';
+    const rows = await database.query(query, [username]);
     
     if (!rows || rows.length === 0) {
       return null;
@@ -50,8 +52,8 @@ export class UserModel {
   }
 
   static async findByEmail(email: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, role, is_active, created_at, updated_at FROM users WHERE email = ?';
-    const [rows] = await database.query(query, [email]);
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE email = ?';
+    const rows = await database.query(query, [email]);
     
     if (!rows || rows.length === 0) {
       return null;
@@ -62,7 +64,7 @@ export class UserModel {
 
   static async findByUsernameWithPassword(username: string): Promise<(User & { password: string }) | null> {
     const query = 'SELECT * FROM users WHERE username = ? AND is_active = 1';
-    const [rows] = await database.query(query, [username]);
+    const rows = await database.query(query, [username]);
     
     if (!rows || rows.length === 0) {
       return null;
@@ -119,7 +121,7 @@ export class UserModel {
     const offset = (page - 1) * limit;
     
     const countQuery = 'SELECT COUNT(*) as total FROM users';
-    const [countResult] = await database.query(countQuery);
+    const countResult = await database.query(countQuery);
     const total = countResult[0].total;
 
     const query = `
@@ -129,7 +131,7 @@ export class UserModel {
       LIMIT ? OFFSET ?
     `;
     
-    const [rows] = await database.query(query, [limit, offset]);
+    const rows = await database.query(query, [limit, offset]);
 
     return { users: rows, total };
   }

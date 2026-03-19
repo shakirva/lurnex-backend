@@ -92,12 +92,13 @@ export class JobApplicationController {
       // SIMPLE - No auth check, just get applications
       console.log('📋 Getting all applications for dashboard...');
       
-      const applications = await JobApplicationModel.findAll();
+      const result = await JobApplicationModel.findAll();
 
       res.json({
         success: true,
         message: 'Applications retrieved successfully',
-        data: applications
+        data: result.applications,
+        total: result.total
       } as ApiResponse);
 
     } catch (error) {
@@ -106,8 +107,7 @@ export class JobApplicationController {
       res.json({
         success: true,
         message: 'Applications retrieved successfully',
-        data: [],
-        pagination: { page: 1, limit: 0, total: 0, totalPages: 1 }
+        data: []
       } as ApiResponse);
     }
   }

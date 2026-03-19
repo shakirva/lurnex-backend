@@ -60,7 +60,7 @@ export class JobApplicationModel {
       WHERE ja.id = ?
     `;
     
-    const [rows] = await database.query(query, [id]);
+    const rows = await database.query(query, [id]);
     
     if (!rows || rows.length === 0) {
       return null;
@@ -75,7 +75,7 @@ export class JobApplicationModel {
   ): Promise<{ applications: JobApplication[], total: number }> {
     // Count total records
     const countQuery = 'SELECT COUNT(*) as total FROM job_applications WHERE job_id = ?';
-    const [countResult] = await database.query(countQuery, [jobId]);
+    const countResult = await database.query(countQuery, [jobId]);
     const total = countResult[0].total;
 
     // Get paginated results
@@ -88,7 +88,7 @@ export class JobApplicationModel {
       LIMIT ? OFFSET ?
     `;
 
-    const [rows] = await database.query(query, [jobId, pagination.limit, pagination.offset]);
+    const rows = await database.query(query, [jobId, pagination.limit, pagination.offset]);
 
     return { applications: rows, total };
   }
@@ -116,15 +116,17 @@ export class JobApplicationModel {
       // Map to frontend format
       const mapped = applications.map(app => ({
         id: app.id,
-        jobId: app.job_id,
-        jobTitle: app.job_title || '',
-        candidateName: app.applicant_name || '',
-        email: app.applicant_email || '',
-        phone: app.applicant_phone || '',
-        appliedDate: app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '',
-        resume: app.resume_path || '',
-        paymentFile: app.payment_file || '',
-        coverLetter: app.cover_letter || '',
+        job_id: app.job_id,
+        job_title: app.job_title || '',
+        company_name: app.company || '',
+        applicant_name: app.applicant_name || '',
+        applicant_email: app.applicant_email || '',
+        applicant_phone: app.applicant_phone || '',
+        created_at: app.applied_at || app.created_at || new Date().toISOString(),
+        status: app.status || 'Pending',
+        resume_path: app.resume_path || '',
+        payment_file: app.payment_file || '',
+        cover_letter: app.cover_letter || '',
       }));
 
       console.log('✅ Found applications:', mapped.length);
@@ -166,9 +168,9 @@ export class JobApplicationModel {
       recent: 'SELECT COUNT(*) as count FROM job_applications WHERE applied_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'
     };
 
-    const [totalResult] = await database.query(queries.total);
-    const [byStatusResult] = await database.query(queries.byStatus);
-    const [recentResult] = await database.query(queries.recent);
+    const totalResult = await database.query(queries.total);
+    const byStatusResult = await database.query(queries.byStatus);
+    const recentResult = await database.query(queries.recent);
 
     return {
       total: totalResult[0].count,
@@ -186,7 +188,7 @@ export class JobApplicationModel {
       ORDER BY ja.applied_at DESC
     `;
     
-    const [rows] = await database.query(query, [email]);
+    const rows = await database.query(query, [email]);
     return rows;
   }
 }

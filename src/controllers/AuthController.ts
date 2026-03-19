@@ -9,53 +9,95 @@ export class AuthController {
     try {
       const { username, password }: LoginRequest = req.body;
 
-      console.log('🔐 Login attempt:', { username, password, body: req.body });
-
-      // Clean inputs
       const cleanUsername = username?.toString().trim();
       const cleanPassword = password?.toString().trim();
 
-      console.log('🧹 Cleaned inputs:', { cleanUsername, cleanPassword });
-
-      // SIMPLE HARDCODED CHECK - WORKS IMMEDIATELY!
+      // --- Hardcoded admin shortcut ---
       if (cleanUsername === 'admin' && cleanPassword === 'admin123') {
-        // Generate JWT token
-        const tokenPayload: AuthTokenPayload = {
-          userId: 1,
-          username: 'admin',
-          role: 'admin'
-        };
-
+        const tokenPayload: AuthTokenPayload = { userId: 1, username: 'admin', role: 'admin' };
         const token = jwt.sign(tokenPayload, config.jwt.secret, { expiresIn: '24h' });
-
         res.json({
           success: true,
           message: 'Login successful',
           data: {
             token,
-            user: {
-              id: 1,
-              username: 'admin',
-              email: 'admin@lurnex.com',
-              first_name: 'Admin',
-              last_name: 'User',
-              role: 'admin'
-            }
+            user: { id: 1, username: 'admin', email: 'admin@lurnex.com', first_name: 'Admin', last_name: 'User', role: 'admin' }
           }
         } as ApiResponse);
         return;
       }
 
-      // Invalid credentials
-      res.status(401).json({
-        success: false,
-        message: 'Invalid username or password'
+      // --- DB lookup for employers & job seekers ---
+      const user = await UserModel.findByUsernameWithPassword(cleanUsername);
+
+      if (!user) {
+        res.status(401).json({ success: false, message: 'Invalid username or password' } as ApiResponse);
+        return;
+      }
+
+      const isValid = await UserModel.validatePassword(user, cleanPassword);
+      if (!isValid) {
+        res.status(401).json({ success: false, message: 'Invalid username or password' } as ApiResponse);
+        return;
+      }
+
+      const tokenPayload: AuthTokenPayload = {
+        userId: user.id,
+        username: user.username,
+        role: user.role as any
+      };
+      const token = jwt.sign(tokenPayload, config.jwt.secret, { expiresIn: '24h' });
+
+      res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          token,
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            role: user.role,
+            company_name: (user as any).company_name || null,
+            phone: (user as any).phone || null,
+          }
+        }
       } as ApiResponse);
 
     } catch (error) {
       next(error);
     }
   }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ success: false, message: 'Email is required' } as ApiResponse);
+        return;
+      }
+
+      const user = await UserModel.findByEmail(email);
+
+      // Always respond with success (don't reveal whether email exists)
+      res.json({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      } as ApiResponse);
+
+      // TODO: In production, send actual reset email via nodemailer/sendgrid
+      if (user) {
+        console.log(`📧 Password reset requested for: ${email}`);
+      }
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
 
   static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -84,10 +126,28 @@ export class AuthController {
       // Create new user
       const newUser = await UserModel.create(userData);
 
+      // Generate JWT token so user is auto-logged in after registration
+      const tokenPayload: AuthTokenPayload = {
+        userId: newUser.id,
+        username: newUser.username,
+        role: newUser.role as any
+      };
+      const token = jwt.sign(tokenPayload, config.jwt.secret, { expiresIn: '24h' });
+
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
-        data: newUser
+        data: {
+          token,
+          user: {
+            id: newUser.id,
+            username: newUser.username,
+            email: newUser.email,
+            first_name: newUser.first_name,
+            last_name: newUser.last_name,
+            role: newUser.role,
+          }
+        }
       } as ApiResponse);
 
     } catch (error) {

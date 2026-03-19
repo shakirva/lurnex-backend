@@ -4,7 +4,9 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'employer';
+  phone?: string;
+  company_name?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -67,7 +69,7 @@ export interface ContactMessage {
 export interface AuthTokenPayload {
   userId: number;
   username: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'employer';
 }
 
 export interface ApiResponse<T = any> {
@@ -153,7 +155,9 @@ export interface CreateUserRequest {
   password: string;
   first_name: string;
   last_name: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'user' | 'employer';
+  phone?: string;
+  company_name?: string;
 }
 
 export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, 'password'>> {

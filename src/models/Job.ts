@@ -190,7 +190,7 @@ export class JobModel {
       ORDER BY j.created_at DESC
     `;
 
-    const [rows] = await database.query(query, [categoryName]);
+    const rows = await database.query(query, [categoryName]);
 
     return rows.map((job: any) => ({
       ...job,
@@ -215,10 +215,10 @@ export class JobModel {
       recent: 'SELECT COUNT(*) as count FROM jobs WHERE is_active = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'
     };
 
-    const [totalResult] = await database.query(queries.total);
-    const [byTypeResult] = await database.query(queries.byType);
-    const [byCategoryResult] = await database.query(queries.byCategory);
-    const [recentResult] = await database.query(queries.recent);
+    const totalResult = await database.query(queries.total);
+    const byTypeResult = await database.query(queries.byType);
+    const byCategoryResult = await database.query(queries.byCategory);
+    const recentResult = await database.query(queries.recent);
 
     return {
       total: totalResult[0].count,
