@@ -179,6 +179,40 @@ export class JobApplicationModel {
     };
   }
 
+  static async getEmployerStats(employerId: number): Promise<any> {
+    const queries = {
+      total: `
+        SELECT COUNT(*) as count 
+        FROM job_applications ja
+        JOIN jobs j ON ja.job_id = j.id
+        WHERE j.posted_by = ?
+      `,
+      byStatus: `
+        SELECT ja.status, COUNT(*) as count 
+        FROM job_applications ja
+        JOIN jobs j ON ja.job_id = j.id
+        WHERE j.posted_by = ?
+        GROUP BY ja.status
+      `,
+      recent: `
+        SELECT COUNT(*) as count 
+        FROM job_applications ja
+        JOIN jobs j ON ja.job_id = j.id
+        WHERE j.posted_by = ? AND ja.applied_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      `
+    };
+
+    const totalResult = await database.query(queries.total, [employerId]);
+    const byStatusResult = await database.query(queries.byStatus, [employerId]);
+    const recentResult = await database.query(queries.recent, [employerId]);
+
+    return {
+      total: totalResult[0].count,
+      byStatus: byStatusResult,
+      recentApplications: recentResult[0].count
+    };
+  }
+
   static async findByEmail(email: string): Promise<JobApplication[]> {
     const query = `
       SELECT ja.*, j.title as job_title, j.company

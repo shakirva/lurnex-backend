@@ -54,3 +54,23 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
 
   next();
 };
+
+export const requireAdminOrEmployer = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+    return;
+  }
+
+  if (req.user.role !== 'admin' && req.user.role !== 'employer') {
+    res.status(403).json({
+      success: false,
+      message: 'Admin or Employer privileges required'
+    });
+    return;
+  }
+
+  next();
+};

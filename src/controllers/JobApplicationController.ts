@@ -114,10 +114,10 @@ export class JobApplicationController {
 
   static async getApplicationById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employer')) {
         res.status(403).json({
           success: false,
-          message: 'Admin privileges required'
+          message: 'Admin or Employer privileges required'
         } as ApiResponse);
         return;
       }
@@ -133,6 +133,18 @@ export class JobApplicationController {
         return;
       }
 
+      // If employer, check if they own the job
+      if (req.user.role === 'employer') {
+        const job = await JobModel.findById(application.job_id);
+        if (!job || job.posted_by !== req.user.userId) {
+          res.status(403).json({
+            success: false,
+            message: 'Access denied to this application'
+          } as ApiResponse);
+          return;
+        }
+      }
+
       res.json({
         success: true,
         message: 'Application retrieved successfully',
@@ -146,10 +158,10 @@ export class JobApplicationController {
 
   static async getApplicationsByJob(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employer')) {
         res.status(403).json({
           success: false,
-          message: 'Admin privileges required'
+          message: 'Admin or Employer privileges required'
         } as ApiResponse);
         return;
       }
@@ -159,12 +171,20 @@ export class JobApplicationController {
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
 
-      // Verify job exists
+      // Verify job exists and check ownership if employer
       const job = await JobModel.findById(jobId);
       if (!job) {
         res.status(404).json({
           success: false,
           message: 'Job not found'
+        } as ApiResponse);
+        return;
+      }
+
+      if (req.user.role === 'employer' && job.posted_by !== req.user.userId) {
+        res.status(403).json({
+          success: false,
+          message: 'Access denied to this job\'s applications'
         } as ApiResponse);
         return;
       }
@@ -193,16 +213,31 @@ export class JobApplicationController {
 
   static async updateApplicationStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employer')) {
         res.status(403).json({
           success: false,
-          message: 'Admin privileges required'
+          message: 'Admin or Employer privileges required'
         } as ApiResponse);
         return;
       }
 
       const applicationId = parseInt(req.params.id);
       const { status } = req.body;
+
+      // Access check
+      const application = await JobApplicationModel.findById(applicationId);
+      if (!application) {
+        res.status(404).json({ success: false, message: 'Application not found' });
+        return;
+      }
+
+      if (req.user.role === 'employer') {
+        const job = await JobModel.findById(application.job_id);
+        if (!job || job.posted_by !== req.user.userId) {
+          res.status(403).json({ success: false, message: 'Access denied to this application' });
+          return;
+        }
+      }
 
       const updatedApplication = await JobApplicationModel.updateStatus(applicationId, status);
 
@@ -267,15 +302,17 @@ export class JobApplicationController {
 
   static async getApplicationStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employer')) {
         res.status(403).json({
           success: false,
-          message: 'Admin privileges required'
+          message: 'Admin or Employer privileges required'
         } as ApiResponse);
         return;
       }
 
-      const stats = await JobApplicationModel.getStats();
+      const stats = req.user.role === 'admin' 
+        ? await JobApplicationModel.getStats()
+        : await JobApplicationModel.getEmployerStats(req.user.userId);
 
       res.json({
         success: true,
@@ -290,10 +327,10 @@ export class JobApplicationController {
 
   static async downloadResume(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'admin') {
+      if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'employer')) {
         res.status(403).json({
           success: false,
-          message: 'Admin privileges required'
+          message: 'Admin or Employer privileges required'
         } as ApiResponse);
         return;
       }
@@ -307,6 +344,15 @@ export class JobApplicationController {
           message: 'Application not found'
         } as ApiResponse);
         return;
+      }
+
+      // Check access if employer
+      if (req.user.role === 'employer') {
+        const job = await JobModel.findById(application.job_id);
+        if (!job || job.posted_by !== req.user.userId) {
+          res.status(403).json({ success: false, message: 'Access denied' });
+          return;
+        }
       }
 
       if (!application.resume_path || !fs.existsSync(application.resume_path)) {

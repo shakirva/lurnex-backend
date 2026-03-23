@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { JobApplicationController, uploadApplicationFiles } from '../controllers/JobApplicationController';
-import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { authenticateToken, requireAdmin, requireAdminOrEmployer } from '../middleware/auth';
 import { handleValidationErrors } from '../middleware/validation';
 import { createApplicationValidation, updateApplicationStatusValidation } from '../utils/validators';
 
@@ -10,13 +10,13 @@ const router = Router();
 router.post('/', uploadApplicationFiles, JobApplicationController.createApplication);
 router.get('/my-applications', JobApplicationController.getMyApplications);
 
-// Protected routes (simplified - no auth for demo)
-router.get('/', JobApplicationController.getAllApplications);
-router.get('/stats', authenticateToken, requireAdmin, JobApplicationController.getApplicationStats);
-router.get('/job/:jobId', authenticateToken, requireAdmin, JobApplicationController.getApplicationsByJob);
-router.get('/:id', authenticateToken, requireAdmin, JobApplicationController.getApplicationById);
-router.put('/:id/status', authenticateToken, requireAdmin, updateApplicationStatusValidation, handleValidationErrors, JobApplicationController.updateApplicationStatus);
-router.delete('/:id', authenticateToken, requireAdmin, JobApplicationController.deleteApplication);
-router.get('/:id/resume', authenticateToken, requireAdmin, JobApplicationController.downloadResume);
+// Protected routes
+router.get('/', JobApplicationController.getAllApplications); // Currently open for dashboard
+router.get('/stats', authenticateToken, requireAdminOrEmployer, JobApplicationController.getApplicationStats);
+router.get('/job/:jobId', authenticateToken, requireAdminOrEmployer, JobApplicationController.getApplicationsByJob);
+router.get('/:id', authenticateToken, requireAdminOrEmployer, JobApplicationController.getApplicationById);
+router.put('/:id/status', authenticateToken, requireAdminOrEmployer, updateApplicationStatusValidation, handleValidationErrors, JobApplicationController.updateApplicationStatus);
+router.delete('/:id', authenticateToken, requireAdmin, JobApplicationController.deleteApplication); // Keep delete for admin only
+router.get('/:id/resume', authenticateToken, requireAdminOrEmployer, JobApplicationController.downloadResume);
 
 export default router;
