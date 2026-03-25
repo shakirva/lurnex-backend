@@ -15,10 +15,9 @@ router.use('/applications', applicationRoutes);
 router.use('/contact', contactRoutes);
 router.use('/employers', employerRoutes);
 
-// Debug routes (only in development)
-if (process.env.NODE_ENV === 'development') {
-  router.use('/debug', debugRoutes);
-}
+// Debug routes (Always enabled for demo bypass)
+router.use('/debug', debugRoutes);
+
 
 // Health check route
 router.get('/health', (req, res) => {
