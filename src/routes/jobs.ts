@@ -1,16 +1,18 @@
 import { Router } from 'express';
 import { JobController } from '../controllers/JobController';
-import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { authenticateToken, optionalAuthenticateToken, requireAdmin } from '../middleware/auth';
 import { handleValidationErrors } from '../middleware/validation';
 import { createJobValidation, updateJobValidation, createCategoryValidation } from '../utils/validators';
 
 const router = Router();
 
-// Public routes
-router.get('/', JobController.getAllJobs);
+
+// Publicly accessible routes (with optional auth for masking logic)
+router.get('/', optionalAuthenticateToken, JobController.getAllJobs);
 router.get('/categories', JobController.getJobCategories);
-router.get('/category/:category', JobController.getJobsByCategory);
-router.get('/:id', JobController.getJobById);
+router.get('/category/:category', optionalAuthenticateToken, JobController.getJobsByCategory);
+router.get('/:id', optionalAuthenticateToken, JobController.getJobById);
+
 
 // Protected routes
 router.post('/', authenticateToken, JobController.createJob);

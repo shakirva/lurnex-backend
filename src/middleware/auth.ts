@@ -35,6 +35,24 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const optionalAuthenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.jwt.secret) as AuthTokenPayload;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    // If token is invalid/expired, still continue as guest
+    next();
+  }
+};
+
 export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json({
