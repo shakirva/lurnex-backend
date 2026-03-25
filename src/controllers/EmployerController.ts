@@ -7,11 +7,13 @@ export class EmployerController {
   static async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const query = `
-        SELECT id, username, email, first_name, last_name, phone, company_name, is_active, created_at, updated_at
-        FROM users
-        WHERE role = 'employer'
-        ORDER BY created_at DESC
+        SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.company_name, u.is_active, u.created_at, u.updated_at,
+               (SELECT COUNT(*) FROM jobs WHERE posted_by = u.id) as job_posted_count
+        FROM users u
+        WHERE u.role = 'employer'
+        ORDER BY u.created_at DESC
       `;
+
       const rows = await database.query(query);
 
       res.json({
