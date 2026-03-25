@@ -66,6 +66,12 @@ class Server {
     // API routes
     this.app.use('/api', routes);
 
+    // Root route
+    this.app.get('/', (req, res) => {
+      res.send('🚀 Lurnex Backend Running');
+    });
+
+
     // Serve static files in production
     if (config.nodeEnv === 'production') {
       this.app.use(express.static(path.join(process.cwd(), 'public')));
