@@ -39,17 +39,10 @@ export class JobApplicationModel {
       };
       
     } catch (error) {
-      console.error('❌ Database error (returning fake success):', error);
-      // Return fake success for frontend
-      return {
-        id: Math.floor(Math.random() * 1000),
-        job_id: applicationData.job_id || 1,
-        applicant_name: applicationData.applicant_name,
-        applicant_email: applicationData.applicant_email,
-        status: 'pending',
-        applied_at: new Date().toISOString()
-      };
+      console.error('❌ Database error saving application:', error);
+      throw error;
     }
+
   }
 
   static async findById(id: number): Promise<JobApplication | null> {

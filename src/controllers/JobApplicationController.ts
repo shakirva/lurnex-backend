@@ -56,8 +56,15 @@ export class JobApplicationController {
 
       // Map form fields
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const jobId = parseInt(req.body.job_id);
+        if (!jobId) {
+          res.status(400).json({ success: false, message: 'Job ID is required' });
+          return;
+        }
+        
         const applicationData = {
-          job_id: parseInt(req.body.job_id) || 1,
+          job_id: jobId,
+
           applicant_name: req.body.applicant_name || '',
           applicant_email: req.body.applicant_email || '',
           applicant_phone: req.body.applicant_phone || '',
