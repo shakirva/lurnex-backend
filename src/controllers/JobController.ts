@@ -111,10 +111,17 @@ export class JobController {
   private static async checkUserSubscription(userId?: number): Promise<boolean> {
     if (!userId) return false;
     
-    const { SubscriptionModel } = require('../models/Subscription');
-    const subscription = await SubscriptionModel.getUserSubscription(userId);
-    return !!subscription;
+    try {
+      const { SubscriptionModel } = require('../models/Subscription');
+      const subscription = await SubscriptionModel.getUserSubscription(userId);
+      return !!subscription;
+    } catch (error) {
+      console.error('❌ Demo Error: Subscription check failed (failing safe as guest):', error);
+      // Fail safe - treat the user as a guest if we can't verify their plan
+      return false;
+    }
   }
+
 
   // Helper to mask sensitive job details for free users
   private static maskJob(job: any): any {
