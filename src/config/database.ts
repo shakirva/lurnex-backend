@@ -2,65 +2,89 @@ import mysql from 'mysql2/promise';
 import config from '../config';
 
 class Database {
-  private connection: mysql.Connection | null = null;
+  private pool: mysql.Pool | null = null;
 
-  async connect(): Promise<mysql.Connection> {
-    if (this.connection) {
-      return this.connection;
+  private getPool(): mysql.Pool {
+    if (this.pool) {
+      return this.pool;
     }
 
-    try {
-      this.connection = await mysql.createConnection({
-        host: config.database.host,
-        port: config.database.port,
-        user: config.database.user,
-        password: config.database.password,
-        database: config.database.name,
-        timezone: '+00:00',
-        dateStrings: true,
-        multipleStatements: true,
-      });
+    this.pool = mysql.createPool({
+      host: config.database.host,
+      port: config.database.port,
+      user: config.database.user,
+      password: config.database.password,
+      database: config.database.name,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0,
+      timezone: '+00:00',
+      dateStrings: true,
+      multipleStatements: true,
+    });
 
-      console.log('✅ Database connected successfully');
-      return this.connection;
+    console.log('✅ Database pool created successfully');
+    return this.pool;
+  }
+
+  async getConnection(): Promise<mysql.PoolConnection> {
+    const pool = this.getPool();
+    try {
+      return await pool.getConnection();
     } catch (error) {
-      console.error('❌ Database connection failed:', error);
+      console.error('❌ Failed to get connection from pool:', error);
+      throw error;
+    }
+  }
+
+  async connect(): Promise<void> {
+    try {
+      const connection = await this.getConnection();
+      console.log('✅ Database connected successfully (Pool ready)');
+      connection.release();
+    } catch (error) {
+      console.error('❌ Database connection test failed:', error);
       throw error;
     }
   }
 
   async disconnect(): Promise<void> {
-    if (this.connection) {
-      await this.connection.end();
-      this.connection = null;
-      console.log('🔌 Database disconnected');
+    if (this.pool) {
+      await this.pool.end();
+      this.pool = null;
+      console.log('🔌 Database pool closed');
     }
   }
 
   async query(sql: string, params?: any[]): Promise<any> {
-    const connection = await this.connect();
+    const pool = this.getPool();
     try {
-      const [results] = await (params ? connection.query(sql, params) : connection.query(sql));
+      const [results] = await (params ? pool.query(sql, params) : pool.query(sql));
       return results;
     } catch (error) {
       console.error('Query Error:', error);
+      if ((error as any).code === 'PROTOCOL_CONNECTION_LOST') {
+        console.error('⚠️ Database connection lost');
+      }
       throw error;
     }
   }
 
-  async beginTransaction(): Promise<void> {
-    const connection = await this.connect();
-    await connection.beginTransaction();
-  }
-
-  async commit(): Promise<void> {
-    const connection = await this.connect();
-    await connection.commit();
-  }
-
-  async rollback(): Promise<void> {
-    const connection = await this.connect();
-    await connection.rollback();
+  async transaction<T>(callback: (connection: mysql.PoolConnection) => Promise<T>): Promise<T> {
+    const connection = await this.getConnection();
+    try {
+      await connection.beginTransaction();
+      const result = await callback(connection);
+      await connection.commit();
+      return result;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async createDatabase(): Promise<void> {
