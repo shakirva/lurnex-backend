@@ -175,9 +175,24 @@ export class JobModel {
   }
 
   static async delete(id: number): Promise<boolean> {
-    const query = 'DELETE FROM jobs WHERE id = ?';
-    const result = await database.query(query, [id]);
-    return result.affectedRows > 0;
+    try {
+      console.log('🗑️ Attempting to delete job with ID:', id);
+      const query = 'DELETE FROM jobs WHERE id = ?';
+      const result = await database.query(query, [id]);
+      
+      console.log('🗑️ Job deletion result:', result);
+      
+      // Handle both cases: result being the object directly or some libraries returning result[0]
+      const affectedRows = result.affectedRows !== undefined ? result.affectedRows : 
+                          (Array.isArray(result) && result[0] && result[0].affectedRows !== undefined ? result[0].affectedRows : 0);
+      
+      console.log('📉 Affected rows:', affectedRows);
+      
+      return affectedRows > 0;
+    } catch (error) {
+      console.error('❌ Database error during job deletion:', error);
+      throw error;
+    }
   }
 
   static async findByCategory(categoryName: string): Promise<Job[]> {

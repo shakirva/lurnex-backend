@@ -181,6 +181,15 @@ export class JobController {
       }
 
       const jobId = parseInt(req.params.id);
+      
+      if (isNaN(jobId)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid job ID'
+        } as ApiResponse);
+        return;
+      }
+
       const success = await JobModel.delete(jobId);
 
       if (!success) {

@@ -100,7 +100,7 @@ export class ContactModel {
 
   static async getUnreadCount(): Promise<number> {
     const query = 'SELECT COUNT(*) as count FROM contact_messages WHERE is_read = FALSE';
-    const [rows] = await database.query(query);
-    return rows[0].count;
+    const rows = await database.query(query);
+    return rows[0]?.count || 0;
   }
 }
