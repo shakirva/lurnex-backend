@@ -73,7 +73,7 @@ export class ContactModel {
   static async markAsRead(id: number): Promise<ContactMessage | null> {
     const query = 'UPDATE contact_messages SET is_read = TRUE WHERE id = ?';
     const result = await database.query(query, [id]);
-    
+
     if (result.affectedRows === 0) {
       return null;
     }
@@ -84,7 +84,7 @@ export class ContactModel {
   static async markAsUnread(id: number): Promise<ContactMessage | null> {
     const query = 'UPDATE contact_messages SET is_read = FALSE WHERE id = ?';
     const result = await database.query(query, [id]);
-    
+
     if (result.affectedRows === 0) {
       return null;
     }
@@ -100,7 +100,7 @@ export class ContactModel {
 
   static async getUnreadCount(): Promise<number> {
     const query = 'SELECT COUNT(*) as count FROM contact_messages WHERE is_read = FALSE';
-    const rows = await database.query(query);
-    return rows[0]?.count || 0;
+    const [rows] = await database.query(query);
+    return rows[0].count;
   }
 }

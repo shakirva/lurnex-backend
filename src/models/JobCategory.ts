@@ -15,36 +15,36 @@ export class JobCategoryModel {
 
   static async findById(id: number): Promise<JobCategory | null> {
     const query = 'SELECT * FROM job_categories WHERE id = ?';
-    const rows = await database.query(query, [id]);
-    
+    const [rows] = await database.query(query, [id]);
+
     if (!rows || rows.length === 0) {
       return null;
     }
-    
+
     return rows[0];
   }
 
   static async findByName(name: string): Promise<JobCategory | null> {
     const query = 'SELECT * FROM job_categories WHERE name = ?';
-    const rows = await database.query(query, [name]);
-    
+    const [rows] = await database.query(query, [name]);
+
     if (!rows || rows.length === 0) {
       return null;
     }
-    
+
     return rows[0];
   }
 
   static async findAll(): Promise<JobCategory[]> {
     const query = 'SELECT * FROM job_categories ORDER BY name';
-    const rows = await database.query(query);
+    const [rows] = await database.query(query);
     return rows;
   }
 
   static async update(id: number, name: string, description?: string): Promise<JobCategory | null> {
     const query = 'UPDATE job_categories SET name = ?, description = ? WHERE id = ?';
     const result = await database.query(query, [name, description, id]);
-    
+
     if (result.affectedRows === 0) {
       return null;
     }
@@ -66,8 +66,8 @@ export class JobCategoryModel {
       GROUP BY jc.id, jc.name, jc.description, jc.created_at
       ORDER BY jc.name
     `;
-    
-    const rows = await database.query(query);
+
+    const [rows] = await database.query(query);
     return rows;
   }
 }

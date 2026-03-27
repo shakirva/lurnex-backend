@@ -10,11 +10,11 @@ export class JobModel {
           logo, category_id, food_accommodation, gender, posted_by, expires_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      
+
       const requirementsJson = JSON.stringify(jobData.requirements || []);
-      
+
       console.log('💾 Creating job with cleaned data...');
-      
+
       const result = await database.query(query, [
         jobData.title || null,
         jobData.company || null,
@@ -32,7 +32,7 @@ export class JobModel {
       ]);
 
       console.log('✅ Job inserted, result:', result);
-      
+
       // Return a simple job object without calling findById
       const newJob: Job = {
         id: result.insertId || result.affectedRows,
@@ -55,10 +55,10 @@ export class JobModel {
         updated_at: new Date().toISOString(),
         posted: 'Just now'
       };
-      
+
       console.log('🎉 Job created successfully:', newJob);
       return newJob;
-      
+
     } catch (error) {
       console.error('❌ Job creation error:', error);
       throw error;
@@ -74,13 +74,13 @@ export class JobModel {
         LEFT JOIN job_categories jc ON j.category_id = jc.id
         WHERE j.id = ?
       `;
-      
+
       console.log('🔍 FindById Query:', query, 'ID:', id);
-      
+
       const rows = await database.query(query, [id]);
-      
+
       console.log('📊 FindById Result:', rows);
-      
+
       // Handle different result formats
       let jobData;
       if (Array.isArray(rows) && rows.length > 0) {
@@ -91,21 +91,21 @@ export class JobModel {
         console.log('❌ No job found with ID:', id);
         return null;
       }
-      
+
       if (!jobData) {
         return null;
       }
-      
+
       console.log('✅ Job found:', jobData);
-      
+
       return {
         ...jobData,
-        requirements: typeof jobData.requirements === 'string' 
+        requirements: typeof jobData.requirements === 'string'
           ? JSON.parse(jobData.requirements || '[]')
           : (jobData.requirements || []),
-        posted: jobData.days_ago === 0 ? 'Today' : 
-                jobData.days_ago === 1 ? '1 day ago' : 
-                `${jobData.days_ago} days ago`
+        posted: jobData.days_ago === 0 ? 'Today' :
+          jobData.days_ago === 1 ? '1 day ago' :
+            `${jobData.days_ago} days ago`
       };
     } catch (error) {
       console.error('❌ FindById error:', error);
@@ -134,9 +134,9 @@ export class JobModel {
         : typeof job.requirements === 'string'
           ? job.requirements.split(',').map((req: string) => req.trim())
           : [],
-      posted: job.days_ago === 0 ? 'Today' : 
-              job.days_ago === 1 ? '1 day ago' : 
-              `${job.days_ago} days ago`
+      posted: job.days_ago === 0 ? 'Today' :
+        job.days_ago === 1 ? '1 day ago' :
+          `${job.days_ago} days ago`
     })) : [];
 
     return jobs;
@@ -175,24 +175,9 @@ export class JobModel {
   }
 
   static async delete(id: number): Promise<boolean> {
-    try {
-      console.log('🗑️ Attempting to delete job with ID:', id);
-      const query = 'DELETE FROM jobs WHERE id = ?';
-      const result = await database.query(query, [id]);
-      
-      console.log('🗑️ Job deletion result:', result);
-      
-      // Handle both cases: result being the object directly or some libraries returning result[0]
-      const affectedRows = result.affectedRows !== undefined ? result.affectedRows : 
-                          (Array.isArray(result) && result[0] && result[0].affectedRows !== undefined ? result[0].affectedRows : 0);
-      
-      console.log('📉 Affected rows:', affectedRows);
-      
-      return affectedRows > 0;
-    } catch (error) {
-      console.error('❌ Database error during job deletion:', error);
-      throw error;
-    }
+    const query = 'DELETE FROM jobs WHERE id = ?';
+    const result = await database.query(query, [id]);
+    return result.affectedRows > 0;
   }
 
   static async findByCategory(categoryName: string): Promise<Job[]> {
@@ -210,9 +195,9 @@ export class JobModel {
     return rows.map((job: any) => ({
       ...job,
       requirements: JSON.parse(job.requirements || '[]'),
-      posted: job.days_ago === 0 ? 'Today' : 
-              job.days_ago === 1 ? '1 day ago' : 
-              `${job.days_ago} days ago`
+      posted: job.days_ago === 0 ? 'Today' :
+        job.days_ago === 1 ? '1 day ago' :
+          `${job.days_ago} days ago`
     }));
   }
 

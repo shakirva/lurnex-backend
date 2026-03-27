@@ -7,7 +7,7 @@ export class JobController {
   static async createJob(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       console.log('📝 Creating job with data:', req.body);
-      
+
       // Clean up the job data and convert frontend fields to backend fields
       const jobData: CreateJobRequest = {
         title: req.body.title,
@@ -23,14 +23,14 @@ export class JobController {
         gender: req.body.gender || 'Any',
         expires_at: req.body.expires_at || null
       };
-      
+
       // Get user ID from authenticated token
       if (!req.user) {
         res.status(401).json({ success: false, message: 'Authentication required' });
         return;
       }
       const userId = req.user.userId;
-      
+
       const newJob = await JobModel.create(jobData, userId);
 
       res.status(201).json({
@@ -48,16 +48,16 @@ export class JobController {
   static async getAllJobs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       console.log('📋 Getting jobs for user:', req.user?.username || 'Guest');
-      
+
       const jobs = await JobModel.findAll();
-      
+
       // Check for active subscription
       const hasSubscription = await JobController.checkUserSubscription(req.user?.userId);
-      
+
       // If no subscription and not an admin/employer who posted it, mask sensitive data
-      const processedJobs = jobs.map(job => 
-        hasSubscription || req.user?.role === 'admin' 
-          ? job 
+      const processedJobs = jobs.map(job =>
+        hasSubscription || req.user?.role === 'admin'
+          ? job
           : JobController.maskJob(job)
       );
 
@@ -91,9 +91,9 @@ export class JobController {
 
       // Check for active subscription
       const hasSubscription = await JobController.checkUserSubscription(req.user?.userId);
-      
+
       const processedJob = hasSubscription || req.user?.role === 'admin' || req.user?.userId === job.posted_by
-        ? job 
+        ? job
         : JobController.maskJob(job);
 
       res.json({
@@ -110,7 +110,7 @@ export class JobController {
   // Helper to check if user has any active plan
   private static async checkUserSubscription(userId?: number): Promise<boolean> {
     if (!userId) return false;
-    
+
     try {
       const { SubscriptionModel } = require('../models/Subscription');
       const subscription = await SubscriptionModel.getUserSubscription(userId);
@@ -147,7 +147,23 @@ export class JobController {
       }
 
       const jobId = parseInt(req.params.id);
-      const updates: UpdateJobRequest = req.body;
+      
+      // Clean up and normalize update data
+      const updates: any = { ...req.body };
+      
+      // Map frontend camelCase to backend snake_case
+      if (updates.foodAccommodation !== undefined) {
+        updates.food_accommodation = updates.foodAccommodation;
+        delete updates.foodAccommodation;
+      }
+      if (updates.expiresAt !== undefined) {
+        updates.expires_at = updates.expiresAt;
+        delete updates.expiresAt;
+      }
+      // category_id mapping if needed
+      if (updates.category !== undefined && typeof updates.category === 'number') {
+        updates.category_id = updates.category;
+      }
 
       const updatedJob = await JobModel.update(jobId, updates);
 
@@ -181,15 +197,6 @@ export class JobController {
       }
 
       const jobId = parseInt(req.params.id);
-      
-      if (isNaN(jobId)) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid job ID'
-        } as ApiResponse);
-        return;
-      }
-
       const success = await JobModel.delete(jobId);
 
       if (!success) {

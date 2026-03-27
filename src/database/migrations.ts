@@ -152,21 +152,68 @@ export const createTables = async (): Promise<void> => {
     await database.query(createPlansTable);
     await database.query(createSubscriptionsTable);
 
-    // Patch existing users table: add missing columns if they don't exist
-    const columns: any[] = await database.query(`DESCRIBE users`);
-    const columnNames = columns.map(c => c.Field);
+    // --- DATABASE PATCHING (Safe updates for existing tables) ---
+    console.log('🩹 Running database patches...');
 
-    if (!columnNames.includes('phone')) {
+    // 1. Patch users table
+    const userColumns: any[] = await database.query(`DESCRIBE users`);
+    const userColNames = userColumns.map(c => c.Field);
+
+    if (!userColNames.includes('phone')) {
       await database.query(`ALTER TABLE users ADD COLUMN phone VARCHAR(20) AFTER last_name`);
       console.log('✅ Added phone column to users table');
     }
-    if (!columnNames.includes('company_name')) {
+    if (!userColNames.includes('company_name')) {
       await database.query(`ALTER TABLE users ADD COLUMN company_name VARCHAR(100) AFTER phone`);
       console.log('✅ Added company_name column to users table');
     }
-    
-    // Always update enum in case it needs it
+    if (!userColNames.includes('is_active')) {
+      await database.query(`ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER company_name`);
+    }
     await database.query(`ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user', 'employer') DEFAULT 'user'`);
+
+    // 2. Patch jobs table
+    const jobColumns: any[] = await database.query(`DESCRIBE jobs`);
+    const jobColNames = jobColumns.map(c => c.Field);
+
+    // Handle legacy employer_id vs posted_by
+    if (jobColNames.includes('employer_id') && !jobColNames.includes('posted_by')) {
+      await database.query(`ALTER TABLE jobs CHANGE employer_id posted_by INT`);
+      console.log('✅ Renamed employer_id to posted_by in jobs table');
+    } else if (!jobColNames.includes('posted_by')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN posted_by INT AFTER gender`);
+      console.log('✅ Added posted_by column to jobs table');
+    }
+
+    if (!jobColNames.includes('is_active')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER gender`);
+      console.log('✅ Added is_active column to jobs table');
+    }
+    if (!jobColNames.includes('expires_at')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN expires_at TIMESTAMP NULL AFTER posted_by`);
+    }
+    if (!jobColNames.includes('requirements')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN requirements JSON AFTER description`);
+    }
+    if (!jobColNames.includes('logo')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN logo VARCHAR(255) AFTER requirements`);
+    }
+    if (!jobColNames.includes('food_accommodation')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN food_accommodation ENUM('Provided', 'Not Provided', 'Partial') AFTER category_id`);
+    }
+
+    // 3. Patch job_applications table
+    const appColumns: any[] = await database.query(`DESCRIBE job_applications`);
+    const appColNames = appColumns.map(c => c.Field);
+
+    if (!appColNames.includes('payment_file')) {
+      await database.query(`ALTER TABLE job_applications ADD COLUMN payment_file VARCHAR(255) AFTER resume_path`);
+    }
+    if (!appColNames.includes('created_at')) {
+      await database.query(`ALTER TABLE job_applications ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+    }
+    // Update status enum values to match frontend
+    await database.query(`ALTER TABLE job_applications MODIFY COLUMN status ENUM('pending', 'reviewing', 'shortlisted', 'rejected', 'hired') DEFAULT 'pending'`);
 
     console.log('✅ All database tables created/updated successfully');
   } catch (error) {
