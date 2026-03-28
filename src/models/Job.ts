@@ -69,9 +69,11 @@ export class JobModel {
     try {
       const query = `
         SELECT j.*, jc.name as category_name,
+               u.email as employer_email, u.phone as employer_phone,
                TIMESTAMPDIFF(DAY, j.created_at, NOW()) as days_ago
         FROM jobs j
         LEFT JOIN job_categories jc ON j.category_id = jc.id
+        LEFT JOIN users u ON j.posted_by = u.id
         WHERE j.id = ?
       `;
 
@@ -117,9 +119,11 @@ export class JobModel {
     // Simple query without parameters
     const query = `
       SELECT j.*, jc.name as category_name,
+             u.email as employer_email, u.phone as employer_phone,
              TIMESTAMPDIFF(DAY, j.created_at, NOW()) as days_ago
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category_id = jc.id
+      LEFT JOIN users u ON j.posted_by = u.id
       WHERE j.is_active = 1
       ORDER BY j.created_at DESC
     `;

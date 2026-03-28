@@ -132,6 +132,8 @@ export class JobController {
       description: job.description ? job.description.substring(0, 150) + '... (Upgrade to read full description)' : '',
       logo: null, // Don't show company logo
       requirements: ['Upgrade plan to see requirements'],
+      employer_email: '🔒 Hidden',
+      employer_phone: '🔒 Hidden',
       is_masked: true // Flag for frontend to show "Upgrade" UI
     };
   }
