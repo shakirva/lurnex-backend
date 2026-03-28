@@ -8,11 +8,15 @@ export class EmployerController {
     try {
       const query = `
         SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.company_name, u.is_active, u.created_at, u.updated_at,
-               (SELECT COUNT(*) FROM jobs WHERE posted_by = u.id) as job_posted_count
+               (SELECT COUNT(*) FROM jobs WHERE posted_by = u.id) as job_posted_count,
+               sp.name as plan_name, us.expires_at as plan_expires_at
         FROM users u
+        LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.is_active = 1 AND us.expires_at > CURRENT_TIMESTAMP
+        LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
         WHERE u.role = 'employer'
         ORDER BY u.created_at DESC
       `;
+
 
       const rows = await database.query(query);
 

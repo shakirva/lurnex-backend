@@ -17,6 +17,7 @@ export const createTables = async (): Promise<void> => {
         role ENUM('admin', 'user', 'employer') DEFAULT 'user',
         phone VARCHAR(20),
         company_name VARCHAR(100),
+        experience_years INT DEFAULT 0,
         is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -167,8 +168,12 @@ export const createTables = async (): Promise<void> => {
       await database.query(`ALTER TABLE users ADD COLUMN company_name VARCHAR(100) AFTER phone`);
       console.log('✅ Added company_name column to users table');
     }
+    if (!userColNames.includes('experience_years')) {
+      await database.query(`ALTER TABLE users ADD COLUMN experience_years INT DEFAULT 0 AFTER company_name`);
+      console.log('✅ Added experience_years column to users table');
+    }
     if (!userColNames.includes('is_active')) {
-      await database.query(`ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER company_name`);
+      await database.query(`ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER experience_years`);
     }
     await database.query(`ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user', 'employer') DEFAULT 'user'`);
 

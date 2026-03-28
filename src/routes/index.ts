@@ -6,6 +6,8 @@ import contactRoutes from './contact';
 import employerRoutes from './employers';
 import debugRoutes from './debug';
 
+import adminRoutes from './admin';
+
 const router = Router();
 
 // API Routes
@@ -14,9 +16,11 @@ router.use('/jobs', jobRoutes);
 router.use('/applications', applicationRoutes);
 router.use('/contact', contactRoutes);
 router.use('/employers', employerRoutes);
+router.use('/admin', adminRoutes);
 
 // Debug routes (Always enabled for demo bypass)
 router.use('/debug', debugRoutes);
+
 
 
 // Health check route

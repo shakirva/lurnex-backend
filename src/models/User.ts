@@ -7,8 +7,8 @@ export class UserModel {
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     
     const query = `
-      INSERT INTO users (username, email, password, first_name, last_name, role, phone, company_name)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (username, email, password, first_name, last_name, role, phone, company_name, experience_years)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const result = await database.query(query, [
@@ -20,6 +20,7 @@ export class UserModel {
       userData.role || 'user',
       (userData as any).phone || null,
       (userData as any).company_name || null,
+      (userData as any).experience_years || 0,
     ]);
 
     const createdUser = await this.findById(result.insertId);
@@ -30,7 +31,7 @@ export class UserModel {
   }
 
   static async findById(id: number): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE id = ?';
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE id = ?';
     const rows = await database.query(query, [id]);
     
     if (!rows || rows.length === 0) {
@@ -41,7 +42,7 @@ export class UserModel {
   }
 
   static async findByUsername(username: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE username = ?';
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE username = ?';
     const rows = await database.query(query, [username]);
     
     if (!rows || rows.length === 0) {
@@ -52,7 +53,7 @@ export class UserModel {
   }
 
   static async findByEmail(email: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, role, is_active, created_at, updated_at FROM users WHERE email = ?';
+    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE email = ?';
     const rows = await database.query(query, [email]);
     
     if (!rows || rows.length === 0) {
@@ -125,7 +126,7 @@ export class UserModel {
     const total = countResult[0].total;
 
     const query = `
-      SELECT id, username, email, first_name, last_name, role, is_active, created_at, updated_at 
+      SELECT id, username, email, first_name, last_name, phone, role, is_active, experience_years, created_at, updated_at 
       FROM users 
       ORDER BY created_at DESC 
       LIMIT ? OFFSET ?
