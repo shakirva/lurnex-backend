@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { UserModel } from '../models/User';
 import config from '../config';
+import { sendResetPasswordEmail } from '../utils/mailer';
 import { ApiResponse, LoginRequest, AuthTokenPayload } from '../types';
 
 export class AuthController {
@@ -82,15 +84,59 @@ export class AuthController {
 
       const user = await UserModel.findByEmail(email);
 
-      // Always respond with success (don't reveal whether email exists)
+      if (user) {
+        // Generate a reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const tokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+        // Save token to DB
+        await UserModel.saveResetToken(email, resetToken, tokenExpires);
+
+        // Send email
+        await sendResetPasswordEmail(email, resetToken);
+      }
+
+      // Always respond with success for security
       res.json({
         success: true,
         message: 'If an account with that email exists, a password reset link has been sent.'
       } as ApiResponse);
 
-      // TODO: In production, send actual reset email via nodemailer/sendgrid
-      if (user) {
-        console.log(`📧 Password reset requested for: ${email}`);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { token, password } = req.body;
+
+      if (!token || !password) {
+        res.status(400).json({ success: false, message: 'Token and password are required' } as ApiResponse);
+        return;
+      }
+
+      // Find user by reset token and ensure it's not expired
+      const user = await UserModel.findByResetToken(token);
+
+      if (!user) {
+        res.status(400).json({ success: false, message: 'Invalid or expired password reset token' } as ApiResponse);
+        return;
+      }
+
+      // Update password
+      const success = await UserModel.changePassword(user.id, password);
+
+      if (success) {
+        // Clear token fields
+        await UserModel.clearResetToken(user.id);
+        
+        res.json({
+          success: true,
+          message: 'Password has been reset successfully. You can now login with your new password.'
+        } as ApiResponse);
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to reset password. Please try again later.' } as ApiResponse);
       }
 
     } catch (error) {

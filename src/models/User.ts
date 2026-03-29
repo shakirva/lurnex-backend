@@ -136,4 +136,29 @@ export class UserModel {
 
     return { users: rows, total };
   }
+
+  static async saveResetToken(email: string, token: string, expires: Date): Promise<boolean> {
+    const query = 'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE email = ?';
+    const result = await database.query(query, [token, expires, email]);
+    return result.affectedRows > 0;
+  }
+
+  static async findByResetToken(token: string): Promise<User | null> {
+    const query = `
+      SELECT * FROM users 
+      WHERE reset_token = ? AND reset_token_expires > NOW()
+    `;
+    const rows = await database.query(query, [token]);
+    
+    if (!rows || rows.length === 0) {
+      return null;
+    }
+    
+    return rows[0];
+  }
+
+  static async clearResetToken(userId: number): Promise<void> {
+    const query = 'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?';
+    await database.query(query, [userId]);
+  }
 }

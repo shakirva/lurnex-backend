@@ -27,6 +27,13 @@ interface Config {
     windowMs: number;
     maxRequests: number;
   };
+  mail: {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+    from: string;
+  };
 }
 
 const config: Config = {
@@ -53,6 +60,13 @@ const config: Config = {
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
+  },
+  mail: {
+    host: process.env.MAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.MAIL_PORT || '587', 10),
+    user: process.env.MAIL_USER || '',
+    pass: process.env.MAIL_PASS || '',
+    from: process.env.MAIL_FROM || '"Lurnex Academy" <noreply@lurnex.com>',
   },
 };
 

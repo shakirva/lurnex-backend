@@ -10,6 +10,7 @@ const router = Router();
 router.post('/login', AuthController.login);
 router.post('/register', registerValidation, handleValidationErrors, AuthController.register);
 router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/reset-password', AuthController.resetPassword);
 
 // Protected routes
 router.get('/profile', authenticateToken, AuthController.getProfile);

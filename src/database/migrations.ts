@@ -19,6 +19,8 @@ export const createTables = async (): Promise<void> => {
         company_name VARCHAR(100),
         experience_years INT DEFAULT 0,
         is_active BOOLEAN DEFAULT TRUE,
+        reset_token VARCHAR(255),
+        reset_token_expires TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
@@ -174,6 +176,12 @@ export const createTables = async (): Promise<void> => {
     }
     if (!userColNames.includes('is_active')) {
       await database.query(`ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER experience_years`);
+    }
+    if (!userColNames.includes('reset_token')) {
+      await database.query(`ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) AFTER is_active`);
+    }
+    if (!userColNames.includes('reset_token_expires')) {
+      await database.query(`ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP NULL AFTER reset_token`);
     }
     await database.query(`ALTER TABLE users MODIFY COLUMN role ENUM('admin', 'user', 'employer') DEFAULT 'user'`);
 
