@@ -64,6 +64,9 @@ export class AuthController {
             role: user.role,
             company_name: (user as any).company_name || null,
             phone: (user as any).phone || null,
+            plan_name: (user as any).plan_name || null,
+            plan_expires_at: (user as any).plan_expires_at || null,
+            application_count: (user as any).application_count || 0
           }
         }
       } as ApiResponse);

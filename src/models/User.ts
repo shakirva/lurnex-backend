@@ -31,7 +31,15 @@ export class UserModel {
   }
 
   static async findById(id: number): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE id = ?';
+    const query = `
+      SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.company_name, u.experience_years, u.role, u.is_active, u.created_at, u.updated_at,
+             (SELECT COUNT(*) FROM job_applications WHERE applicant_email = u.email) as application_count,
+             sp.name as plan_name, us.expires_at as plan_expires_at
+      FROM users u
+      LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.is_active = 1 AND us.expires_at > CURRENT_TIMESTAMP
+      LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
+      WHERE u.id = ?
+    `;
     const rows = await database.query(query, [id]);
     
     if (!rows || rows.length === 0) {
@@ -42,7 +50,15 @@ export class UserModel {
   }
 
   static async findByUsername(username: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE username = ?';
+    const query = `
+      SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.company_name, u.experience_years, u.role, u.is_active, u.created_at, u.updated_at,
+             (SELECT COUNT(*) FROM job_applications WHERE applicant_email = u.email) as application_count,
+             sp.name as plan_name, us.expires_at as plan_expires_at
+      FROM users u
+      LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.is_active = 1 AND us.expires_at > CURRENT_TIMESTAMP
+      LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
+      WHERE u.username = ?
+    `;
     const rows = await database.query(query, [username]);
     
     if (!rows || rows.length === 0) {
@@ -53,7 +69,15 @@ export class UserModel {
   }
 
   static async findByEmail(email: string): Promise<User | null> {
-    const query = 'SELECT id, username, email, first_name, last_name, phone, company_name, experience_years, role, is_active, created_at, updated_at FROM users WHERE email = ?';
+    const query = `
+      SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.company_name, u.experience_years, u.role, u.is_active, u.created_at, u.updated_at,
+             (SELECT COUNT(*) FROM job_applications WHERE applicant_email = u.email) as application_count,
+             sp.name as plan_name, us.expires_at as plan_expires_at
+      FROM users u
+      LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.is_active = 1 AND us.expires_at > CURRENT_TIMESTAMP
+      LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
+      WHERE u.email = ?
+    `;
     const rows = await database.query(query, [email]);
     
     if (!rows || rows.length === 0) {
