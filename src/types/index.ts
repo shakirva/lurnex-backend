@@ -30,6 +30,8 @@ export interface Job {
   is_active: boolean;
   posted_by?: number;
   expires_at?: string;
+  employer_email?: string;
+  employer_phone?: string;
   created_at: string;
   updated_at: string;
   posted?: string; // For frontend compatibility
@@ -124,6 +126,8 @@ export interface CreateJobRequest {
   food_accommodation?: Job['food_accommodation'];
   gender?: Job['gender'];
   expires_at?: string;
+  employer_email?: string;
+  employer_phone?: string;
 }
 
 export interface UpdateJobRequest extends Partial<CreateJobRequest> {

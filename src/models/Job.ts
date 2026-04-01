@@ -7,8 +7,9 @@ export class JobModel {
       const query = `
         INSERT INTO jobs (
           title, company, location, type, salary, description, requirements,
-          logo, category_id, food_accommodation, gender, posted_by, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          logo, category_id, food_accommodation, gender, posted_by, expires_at,
+          employer_email, employer_phone
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const requirementsJson = JSON.stringify(jobData.requirements || []);
@@ -28,7 +29,9 @@ export class JobModel {
         jobData.food_accommodation || 'Not Provided',
         jobData.gender || 'Any',
         postedBy,
-        jobData.expires_at || null
+        jobData.expires_at || null,
+        jobData.employer_email || null,
+        jobData.employer_phone || null
       ]);
 
       console.log('✅ Job inserted, result:', result);
@@ -69,7 +72,8 @@ export class JobModel {
     try {
       const query = `
         SELECT j.*, jc.name as category_name,
-               u.email as employer_email, u.phone as employer_phone,
+               COALESCE(j.employer_email, u.email) as employer_email, 
+               COALESCE(j.employer_phone, u.phone) as employer_phone,
                TIMESTAMPDIFF(DAY, j.created_at, NOW()) as days_ago
         FROM jobs j
         LEFT JOIN job_categories jc ON j.category_id = jc.id
@@ -119,7 +123,8 @@ export class JobModel {
     // Simple query without parameters
     const query = `
       SELECT j.*, jc.name as category_name,
-             u.email as employer_email, u.phone as employer_phone,
+             COALESCE(j.employer_email, u.email) as employer_email, 
+             COALESCE(j.employer_phone, u.phone) as employer_phone,
              TIMESTAMPDIFF(DAY, j.created_at, NOW()) as days_ago
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category_id = jc.id
