@@ -7,6 +7,7 @@ export interface User {
   role: 'admin' | 'user' | 'employer';
   phone?: string;
   company_name?: string;
+  experience_years?: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -158,6 +159,7 @@ export interface CreateUserRequest {
   role?: 'admin' | 'user' | 'employer';
   phone?: string;
   company_name?: string;
+  experience_years?: number;
 }
 
 export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, 'password'>> {
