@@ -10,28 +10,28 @@ mysql -u root -p
 
 ### 2. Create the database
 ```sql
-CREATE DATABASE lurnex_academy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE TriaGull_academy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 3. Create a dedicated user (Optional but recommended)
 ```sql
-CREATE USER 'lurnex_user'@'localhost' IDENTIFIED BY 'lurnex_password123';
-GRANT ALL PRIVILEGES ON lurnex_academy.* TO 'lurnex_user'@'localhost';
+CREATE USER 'TriaGull_user'@'localhost' IDENTIFIED BY 'TriaGull_password123';
+GRANT ALL PRIVILEGES ON TriaGull_academy.* TO 'TriaGull_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 ### 4. Verify database creation
 ```sql
 SHOW DATABASES;
-USE lurnex_academy;
+USE TriaGull_academy;
 SHOW TABLES;
 EXIT;
 ```
 
 ### 5. If you created a new user, update your .env file:
 ```env
-DB_USER=lurnex_user
-DB_PASSWORD=lurnex_password123
+DB_USER=TriaGull_user
+DB_PASSWORD=TriaGull_password123
 ```
 
 ## Option 2: Using Root User (Current Setup)
@@ -43,7 +43,7 @@ mysql -u root -p
 
 ### 2. Create database only
 ```sql
-CREATE DATABASE lurnex_academy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE TriaGull_academy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 SHOW DATABASES;
 EXIT;
 ```

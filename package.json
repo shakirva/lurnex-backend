@@ -1,7 +1,7 @@
 {
-  "name": "lurnex-backend",
+  "name": "TriaGull-backend",
   "version": "1.0.0",
-  "description": "Backend API for Lurnex Academy Job Portal",
+  "description": "Backend API for TriaGull Academy Job Portal",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
@@ -45,6 +45,6 @@
     "ts-jest": "^29.1.1"
   },
   "keywords": ["job-portal", "api", "nodejs", "express", "mysql"],
-  "author": "Lurnex Academy",
+  "author": "TriaGull Academy",
   "license": "MIT"
 }

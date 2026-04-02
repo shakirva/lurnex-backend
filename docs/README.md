@@ -1,6 +1,6 @@
-# Lurnex Academy Backend API
+# TriaGull Academy Backend API
 
-A professional Node.js/Express backend for the Lurnex Academy job portal application with MySQL database integration.
+A professional Node.js/Express backend for the TriaGull Academy job portal application with MySQL database integration.
 
 ## 🚀 Features
 
@@ -48,7 +48,7 @@ Copy `.env.example` to `.env` and update the values:
 # Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=lurnex_academy
+DB_NAME=TriaGull_academy
 DB_USER=root
 DB_PASSWORD=root
 

@@ -13,7 +13,7 @@ export const seedData = async (): Promise<void> => {
     `;
     await database.query(insertAdmin, [
       'admin',
-      'admin@lurnex.com',
+      'admin@triagull.com',
       adminPassword,
       'Admin',
       'User',

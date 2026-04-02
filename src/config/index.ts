@@ -42,7 +42,7 @@ const config: Config = {
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306', 10),
-    name: process.env.DB_NAME || 'lurnex_academy',
+    name: process.env.DB_NAME || 'TriaGull_academy',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'root',
   },
@@ -66,7 +66,7 @@ const config: Config = {
     port: parseInt(process.env.MAIL_PORT || '587', 10),
     user: process.env.MAIL_USER || '',
     pass: process.env.MAIL_PASS || '',
-    from: process.env.MAIL_FROM || '"Lurnex Academy" <noreply@lurnex.com>',
+    from: process.env.MAIL_FROM || '"TriaGull Academy" <noreply@triagull.com>',
   },
 };
 

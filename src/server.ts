@@ -68,7 +68,7 @@ class Server {
 
     // Root route
     this.app.get('/', (req, res) => {
-      res.send('🚀 Lurnex Backend Running');
+      res.send('🚀 TriaGull Backend Running');
     });
 
 

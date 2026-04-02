@@ -21,7 +21,9 @@ export class JobController {
         category_id: req.body.category_id || 1,
         food_accommodation: req.body.foodAccommodation || req.body.food_accommodation || 'Not Provided',
         gender: req.body.gender || 'Any',
-        expires_at: req.body.expires_at || null
+        expires_at: req.body.expires_at || null,
+        employer_email: req.body.employer_email,
+        employer_phone: req.body.employer_phone
       };
 
       // Get user ID from authenticated token

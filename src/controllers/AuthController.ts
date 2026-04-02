@@ -23,7 +23,7 @@ export class AuthController {
           message: 'Login successful',
           data: {
             token,
-            user: { id: 1, username: 'admin', email: 'admin@lurnex.com', first_name: 'Admin', last_name: 'User', role: 'admin' }
+            user: { id: 1, username: 'admin', email: 'admin@triagull.com', first_name: 'Admin', last_name: 'User', role: 'admin' }
           }
         } as ApiResponse);
         return;

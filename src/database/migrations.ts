@@ -56,6 +56,7 @@ export const createTables = async (): Promise<void> => {
         expires_at TIMESTAMP NULL,
         employer_email VARCHAR(100),
         employer_phone VARCHAR(25),
+        posted VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (category_id) REFERENCES job_categories(id) ON DELETE SET NULL,
@@ -223,6 +224,10 @@ export const createTables = async (): Promise<void> => {
     if (!jobColNames.includes('employer_phone')) {
       await database.query(`ALTER TABLE jobs ADD COLUMN employer_phone VARCHAR(25) AFTER employer_email`);
       console.log('✅ Added employer_phone column to jobs table');
+    }
+    if (!jobColNames.includes('posted')) {
+      await database.query(`ALTER TABLE jobs ADD COLUMN posted VARCHAR(50) AFTER employer_phone`);
+      console.log('✅ Added posted column to jobs table');
     }
 
     // 3. Patch job_applications table
