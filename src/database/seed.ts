@@ -22,9 +22,9 @@ export const seedData = async (): Promise<void> => {
 
     // Insert subscription plans (matching frontend slugs)
     const plans = [
-      { name: 'Basic Plan', slug: 'basic', duration: 3, price: 399.00 },
-      { name: 'Standard Plan', slug: 'standard', duration: 6, price: 599.00 },
-      { name: 'Premium Plan', slug: 'premium', duration: 12, price: 999.00 },
+      { name: 'Basic Plan', slug: 'basic', duration: 3, price: 599.00 },
+      { name: 'Standard Plan', slug: 'standard', duration: 6, price: 899.00 },
+      { name: 'Premium Plan', slug: 'premium', duration: 12, price: 1299.00 },
       { name: 'Accountant Plan', slug: 'accountant', duration: 12, price: 3999.00 }
     ];
 
@@ -35,6 +35,8 @@ export const seedData = async (): Promise<void> => {
 
     for (const plan of plans) {
       await database.query(insertPlan, [plan.name, plan.slug, plan.duration, plan.price]);
+      // Also update existing prices for current plans
+      await database.query('UPDATE subscription_plans SET price = ?, duration_months = ? WHERE slug = ?', [plan.price, plan.duration, plan.slug]);
     }
     
     console.log('✅ Subscription plans seeded');
