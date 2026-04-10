@@ -32,14 +32,19 @@ export const registerValidation = [
     .trim()
     .notEmpty()
     .withMessage('First name is required')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('First name must be between 1 and 50 characters'),
+    .isLength({ min: 1, max: 100 })
+    .withMessage('First name must be between 1 and 100 characters'),
   body('last_name')
     .trim()
+    .optional({ checkFalsy: true })
+    .isLength({ max: 100 })
+    .withMessage('Last name cannot exceed 100 characters'),
+  body('phone')
+    .trim()
     .notEmpty()
-    .withMessage('Last name is required')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Last name must be between 1 and 50 characters'),
+    .withMessage('Phone number is required')
+    .isLength({ min: 7, max: 20 })
+    .withMessage('Phone number must be between 7 and 20 characters'),
   body('role')
     .optional()
     .isIn(['admin', 'user', 'employer'])
