@@ -43,6 +43,7 @@ export const seedData = async (): Promise<void> => {
 
     // Insert job categories
     const categories = [
+      { name: 'Accounting', description: 'Accounting and financial roles' },
       { name: 'Development', description: 'Software development and programming jobs' },
       { name: 'Design', description: 'UI/UX design and graphic design positions' },
       { name: 'Marketing', description: 'Digital marketing and content creation roles' },
@@ -52,7 +53,11 @@ export const seedData = async (): Promise<void> => {
       { name: 'Customer Service', description: 'Customer support and service positions' },
       { name: 'Healthcare', description: 'Medical and healthcare professionals' },
       { name: 'Education', description: 'Teaching and educational roles' },
-      { name: 'Engineering', description: 'Engineering and technical positions' }
+      { name: 'Engineering', description: 'Engineering and technical positions' },
+      { name: 'Hospitality', description: 'Hotel, restaurant and tourism roles' },
+      { name: 'Construction', description: 'Building and construction work' },
+      { name: 'IT & Technology', description: 'Software development and IT services' },
+      { name: 'Other', description: 'Miscellaneous job categories' }
     ];
 
     const insertCategory = `
