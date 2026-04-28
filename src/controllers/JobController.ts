@@ -19,6 +19,7 @@ export class JobController {
         requirements: Array.isArray(req.body.requirements) ? req.body.requirements : [req.body.requirements || 'Basic skills'],
         logo: req.body.logo,
         category_id: req.body.category_id || 1,
+        category_name: req.body.category_name || req.body.category,
         food_accommodation: req.body.foodAccommodation || req.body.food_accommodation || 'Not Provided',
         gender: req.body.gender || 'Any',
         expires_at: req.body.expires_at || null,

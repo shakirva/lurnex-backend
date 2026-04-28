@@ -16,6 +16,17 @@ export class JobModel {
 
       console.log('💾 Creating job with cleaned data...');
 
+      // Lookup category_id by name if name is provided and ID is missing or 1/0
+      let finalCategoryId = jobData.category_id || 1;
+      if (jobData.category_name) {
+        const queryCat = 'SELECT id FROM job_categories WHERE name = ?';
+        const catRows = await database.query(queryCat, [jobData.category_name]);
+        if (catRows && catRows.length > 0) {
+          finalCategoryId = catRows[0].id;
+          console.log(`🏷️ Resolved category "${jobData.category_name}" to ID: ${finalCategoryId}`);
+        }
+      }
+
       const result = await database.query(query, [
         jobData.title || null,
         jobData.company || null,
@@ -25,7 +36,7 @@ export class JobModel {
         jobData.description || null,
         requirementsJson,
         jobData.logo || null,
-        jobData.category_id || 1,
+        finalCategoryId,
         jobData.food_accommodation || 'Not Provided',
         jobData.gender || 'Any',
         postedBy,
@@ -47,8 +58,8 @@ export class JobModel {
         description: jobData.description || '',
         requirements: jobData.requirements || [],
         logo: jobData.logo,
-        category_id: jobData.category_id || 1,
-        category_name: 'General',
+        category_id: finalCategoryId,
+        category_name: jobData.category_name || 'General',
         food_accommodation: jobData.food_accommodation || 'Not Provided',
         gender: jobData.gender || 'Any',
         is_active: true,

@@ -123,6 +123,7 @@ export interface CreateJobRequest {
   requirements: string[];
   logo?: string;
   category_id?: number;
+  category_name?: string;
   food_accommodation?: Job['food_accommodation'];
   gender?: Job['gender'];
   expires_at?: string;
