@@ -87,9 +87,9 @@ export class UserModel {
     return rows[0];
   }
 
-  static async findByUsernameWithPassword(username: string): Promise<(User & { password: string }) | null> {
-    const query = 'SELECT * FROM users WHERE username = ? AND is_active = 1';
-    const rows = await database.query(query, [username]);
+  static async findByUsernameWithPassword(usernameOrEmail: string): Promise<(User & { password: string }) | null> {
+    const query = 'SELECT * FROM users WHERE (username = ? OR email = ?) AND is_active = 1';
+    const rows = await database.query(query, [usernameOrEmail, usernameOrEmail]);
     
     if (!rows || rows.length === 0) {
       return null;
