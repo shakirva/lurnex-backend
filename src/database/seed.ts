@@ -6,7 +6,7 @@ export const seedData = async (): Promise<void> => {
     await database.connect();
 
     // Insert default admin user
-    const adminPassword = await bcrypt.hash('admin123', 12);
+    const adminPassword = await bcrypt.hash('Triagull@9048A', 12);
     const insertAdmin = `
       INSERT IGNORE INTO users (username, email, password, first_name, last_name, role)
       VALUES (?, ?, ?, ?, ?, ?)

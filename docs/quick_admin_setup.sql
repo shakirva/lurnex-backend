@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert admin user (password is 'admin123' hashed with bcrypt)
+-- Insert admin user (password is 'Triagull@9048A' hashed with bcrypt)
 INSERT INTO users (username, email, password, first_name, last_name, role) 
-VALUES ('admin', 'admin@lurnex.com', '$2a$12$rMZ0WvDEcBBdq4wXNOlACuFEhL.j4WwduZZq/T.KQV.N8Q8fHkrfW', 'Admin', 'User', 'admin')
-ON DUPLICATE KEY UPDATE password = '$2a$12$rMZ0WvDEcBBdq4wXNOlACuFEhL.j4WwduZZq/T.KQV.N8Q8fHkrfW';
+VALUES ('admin', 'admin@lurnex.com', '$2a$12$P2vO8.1ueoTI.Q.0MP9MAOoEMEoNPMY7n/Wocz8p.Dby2oPxFzQ8O', 'Admin', 'User', 'admin')
+ON DUPLICATE KEY UPDATE password = '$2a$12$P2vO8.1ueoTI.Q.0MP9MAOoEMEoNPMY7n/Wocz8p.Dby2oPxFzQ8O';

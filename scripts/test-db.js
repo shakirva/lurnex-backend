@@ -1,4 +1,4 @@
-import database from './src/config/database';
+import database from '../src/config/database';
 import bcrypt from 'bcryptjs';
 
 async function testDatabase() {
@@ -20,14 +20,14 @@ async function testDatabase() {
       });
       
       // Test password
-      const isValid = await bcrypt.compare('admin123', users[0].password);
+      const isValid = await bcrypt.compare('Triagull@9048A', users[0].password);
       console.log('🔐 Password test:', isValid ? '✅ Valid' : '❌ Invalid');
     } else {
       console.log('❌ Admin user not found');
       
       // Create admin user
       console.log('🔄 Creating admin user...');
-      const adminPassword = await bcrypt.hash('admin123', 12);
+      const adminPassword = await bcrypt.hash('Triagull@9048A', 12);
       const insertAdmin = `
         INSERT INTO users (username, email, password, first_name, last_name, role, is_active)
         VALUES (?, ?, ?, ?, ?, ?, ?)

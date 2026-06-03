@@ -23,7 +23,7 @@ router.post('/debug/test-admin', async (req, res) => {
     }
     
     const admin = users[0];
-    const isPasswordValid = await bcrypt.compare(password || 'admin123', admin.password);
+    const isPasswordValid = await bcrypt.compare(password || 'Triagull@9048A', admin.password);
     
     res.json({
       success: true,

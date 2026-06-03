@@ -91,7 +91,7 @@ curl http://localhost:5000/api/health
 # Test login (after migration)
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+  -d '{"username": "admin", "password": "Triagull@9048A"}'
 ```
 
 ## MySQL Best Practices Applied

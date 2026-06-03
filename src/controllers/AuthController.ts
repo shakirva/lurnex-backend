@@ -15,7 +15,7 @@ export class AuthController {
       const cleanPassword = password?.toString().trim();
 
       // --- Hardcoded admin shortcut ---
-      if (cleanUsername === 'admin' && cleanPassword === 'admin123') {
+      if (cleanUsername === 'admin' && cleanPassword === 'Triagull@9048A') {
         const tokenPayload: AuthTokenPayload = { userId: 1, username: 'admin', role: 'admin' };
         const token = jwt.sign(tokenPayload, config.jwt.secret, { expiresIn: '24h' });
         res.json({

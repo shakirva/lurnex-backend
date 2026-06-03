@@ -162,7 +162,7 @@ Authorization: Bearer <your-jwt-token>
 
 ```
 Username: admin
-Password: admin123
+Password: Triagull@9048A
 ```
 
 ## 📊 Database Schema
@@ -240,7 +240,7 @@ Error responses:
 ```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+  -d '{"username": "admin", "password": "Triagull@9048A"}'
 ```
 
 ### Get Jobs
