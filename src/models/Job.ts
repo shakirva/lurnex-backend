@@ -166,7 +166,7 @@ export class JobModel {
     const setClause: string[] = [];
     const queryParams: any[] = [];
 
-    const forbiddenFields = ['posted', 'category_name', 'days_ago'];
+    const forbiddenFields = ['posted', 'category_name', 'days_ago', 'status'];
 
     Object.entries(updates).forEach(([key, value]) => {
       if (value !== undefined && !forbiddenFields.includes(key)) {
