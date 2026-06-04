@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { JobController } from '../controllers/JobController';
-import { authenticateToken, optionalAuthenticateToken, requireAdmin } from '../middleware/auth';
+import { authenticateToken, optionalAuthenticateToken, requireAdmin, requireAdminOrEmployer } from '../middleware/auth';
 import { handleValidationErrors } from '../middleware/validation';
 import { createJobValidation, updateJobValidation, createCategoryValidation } from '../utils/validators';
 
@@ -16,8 +16,8 @@ router.get('/:id', optionalAuthenticateToken, JobController.getJobById);
 
 // Protected routes
 router.post('/', authenticateToken, JobController.createJob);
-router.put('/:id', authenticateToken, requireAdmin, updateJobValidation, handleValidationErrors, JobController.updateJob);
-router.delete('/:id', authenticateToken, requireAdmin, JobController.deleteJob);
+router.put('/:id', authenticateToken, requireAdminOrEmployer, updateJobValidation, handleValidationErrors, JobController.updateJob);
+router.delete('/:id', authenticateToken, requireAdminOrEmployer, JobController.deleteJob);
 router.get('/admin/stats', authenticateToken, requireAdmin, JobController.getJobStats);
 
 // Category management (Admin only)

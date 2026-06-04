@@ -152,6 +152,24 @@ export class JobController {
       }
 
       const jobId = parseInt(req.params.id);
+
+      // Check ownership or admin status
+      const existingJob = await JobModel.findById(jobId);
+      if (!existingJob) {
+        res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        } as ApiResponse);
+        return;
+      }
+
+      if (req.user.role !== 'admin' && existingJob.posted_by !== req.user.userId) {
+        res.status(403).json({
+          success: false,
+          message: 'Admin privileges required or not authorized to update this job'
+        } as ApiResponse);
+        return;
+      }
       
       // Clean up and normalize update data
       const updates: any = { ...req.body };
@@ -202,6 +220,25 @@ export class JobController {
       }
 
       const jobId = parseInt(req.params.id);
+
+      // Check ownership or admin status
+      const existingJob = await JobModel.findById(jobId);
+      if (!existingJob) {
+        res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        } as ApiResponse);
+        return;
+      }
+
+      if (req.user.role !== 'admin' && existingJob.posted_by !== req.user.userId) {
+        res.status(403).json({
+          success: false,
+          message: 'Admin privileges required or not authorized to delete this job'
+        } as ApiResponse);
+        return;
+      }
+
       const success = await JobModel.delete(jobId);
 
       if (!success) {
