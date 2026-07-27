@@ -1,5 +1,5 @@
 -- ============================================================
--- Lurnex Backend Migration: Employer & Subscription Support
+-- IHRS Backend Migration: Employer & Subscription Support
 -- Run this against your MySQL/MariaDB database
 -- ============================================================
 

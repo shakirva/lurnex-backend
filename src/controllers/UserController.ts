@@ -3,17 +3,13 @@ import database from '../config/database';
 import { ApiResponse } from '../types';
 
 export class UserController {
-  // GET /api/admin/users/candidates — list all job seeker accounts (admin only)
-  static async getCandidates(req: Request, res: Response, next: NextFunction): Promise<void> {
+  // GET /api/admin/users/managers — list all manager accounts (admin only)
+  static async getManagers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const query = `
-        SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.experience_years, u.is_active, u.created_at, u.updated_at,
-               (SELECT COUNT(*) FROM job_applications WHERE applicant_email = u.email) as application_count,
-               sp.name as plan_name, us.expires_at as plan_expires_at
+        SELECT u.id, u.username, u.email, u.first_name, u.last_name, u.phone, u.experience_years, u.is_active, u.created_at, u.updated_at
         FROM users u
-        LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.is_active = 1 AND us.expires_at > CURRENT_TIMESTAMP
-        LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
-        WHERE u.role = 'user'
+        WHERE u.role = 'manager'
         ORDER BY u.created_at DESC
       `;
 

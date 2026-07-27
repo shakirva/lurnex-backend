@@ -1,5 +1,5 @@
 -- Quick admin user setup
-USE lurnex_academy;
+USE ihrs_academy;
 
 -- Create users table if not exists
 CREATE TABLE IF NOT EXISTS users (
@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Insert admin user (password is 'Triagull@9048A' hashed with bcrypt)
 INSERT INTO users (username, email, password, first_name, last_name, role) 
-VALUES ('admin', 'admin@lurnex.com', '$2a$12$P2vO8.1ueoTI.Q.0MP9MAOoEMEoNPMY7n/Wocz8p.Dby2oPxFzQ8O', 'Admin', 'User', 'admin')
+VALUES ('admin', 'admin@ihrs.com', '$2a$12$P2vO8.1ueoTI.Q.0MP9MAOoEMEoNPMY7n/Wocz8p.Dby2oPxFzQ8O', 'Admin', 'User', 'admin')
 ON DUPLICATE KEY UPDATE password = '$2a$12$P2vO8.1ueoTI.Q.0MP9MAOoEMEoNPMY7n/Wocz8p.Dby2oPxFzQ8O';

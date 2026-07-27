@@ -34,7 +34,7 @@ async function testDatabase() {
       `;
       await database.query(insertAdmin, [
         'admin',
-        'admin@lurnex.com',
+        'admin@ihrs.com',
         adminPassword,
         'Admin',
         'User',
